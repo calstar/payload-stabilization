@@ -1,0 +1,29 @@
+Source Code
+
+- General Sensor Tutorials
+https://maker.pro/arduino/tutorial/how-to-interface-arduino-and-the-mpu-6050-sensor
+https://www.programmingelectronics.com/using-the-print-function-with-arduino-part-1/
+https://howtomechatronics.com/tutorials/arduino/arduino-and-mpu6050-accelerometer-and-gyroscope-tutorial/
+https://howtomechatronics.com/tutorials/arduino/how-to-track-orientation-with-arduino-and-adxl345-accelerometer/
+https://gitlab.com/shuvashish/batikkrom.com/blob/master/MuttipleMPU/MuttipleMPU.ino
+https://www.youtube.com/watch?v=fvWNnUdWwrA&ab_channel=Topufrom_Tokyo
+https://www.youtube.com/watch?v=RPHP4fAisz8&ab_channel=BlueDot
+https://www.bluedot.space/tutorials/how-many-devices-can-you-connect-on-i2c-bus/
+
+
+- Sensor to Servo
+https://howtomechatronics.com/projects/diy-arduino-gimbal-self-stabilizing-platform/
+
+
+- Sensor to SD Reader
+https://create.arduino.cc/projecthub/electropeak/sd-card-module-with-arduino-how-to-read-write-data-37f390
+https://learn.adafruit.com/adafruit-micro-sd-breakout-board-card-tutorial/arduino-library
+https://create.arduino.cc/projecthub/electropeak/sd-card-module-with-arduino-how-to-read-write-data-37f390
+
+
+
+- Sensor to Photorelay
+https://create.arduino.cc/projecthub/tarantula3/driving-a-relay-with-an-arduino-722c24
+https://create.arduino.cc/projecthub/tarantula3/driving-a-relay-with-an-arduino-722c24
+https://maker.pro/arduino/projects/driving-a-relay-with-an-arduino
+https://www.circuitbasics.com/how-to-control-lights-with-a-relay-and-arduino/
