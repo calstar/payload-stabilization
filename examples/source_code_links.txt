@@ -18,8 +18,8 @@ https://howtomechatronics.com/projects/diy-arduino-gimbal-self-stabilizing-platf
 - Sensor to SD Reader
 https://create.arduino.cc/projecthub/electropeak/sd-card-module-with-arduino-how-to-read-write-data-37f390
 https://learn.adafruit.com/adafruit-micro-sd-breakout-board-card-tutorial/arduino-library
-
-
+https://www.arduino.cc/en/Tutorial/LibraryExamples/Datalogger - reference for getting multiple sensor data
+https://dronebotworkshop.com/sd-card-arduino/ - reference for getting multiple sensor data
 
 - Sensor to Photorelay
 https://create.arduino.cc/projecthub/tarantula3/driving-a-relay-with-an-arduino-722c24
