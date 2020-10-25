@@ -102,6 +102,13 @@ void setup() {
   if (devStatus == 0) {
     // turn on the DMP, now that it's ready
     // Serial.println(F("Enabling DMP..."));
+
+    // see comments below
+    mpu.CalibrateAccel(6); // this line
+    mpu.CalibrateGyro(6); // and this line
+    mpu.PrintActiveOffsets(); // and this line weren't in the original file on the website 
+    // I added these at somepoint either bc it wasn't calibrating or the calibration function changed at some point
+    
     mpu.setDMPEnabled(true);
 
     attachInterrupt(digitalPinToInterrupt(INTERRUPT_PIN), dmpDataReady, RISING);
