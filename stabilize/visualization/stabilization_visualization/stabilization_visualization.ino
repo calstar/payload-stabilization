@@ -47,8 +47,8 @@ AccX = (Wire.read() << 8 | Wire.read()) / 16384.0; // X-axis value
 AccY = (Wire.read() << 8 | Wire.read()) / 16384.0; // Y-axis value
 AccZ = (Wire.read() << 8 | Wire.read()) / 16384.0; // Z-axis value
 // Calculating Roll and Pitch from the accelerometer data
-accAngleX = (atan(AccY / sqrt(pow(AccX, 2) + pow(AccZ, 2))) * 180 / PI) + 0.75; // - 0.58; // - 0.58; // AccErrorX ~(0.58) See the calculate_IMU_error()custom function for more details
-accAngleY = (atan(-1 * AccX / sqrt(pow(AccY, 2) + pow(AccZ, 2))) * 180 / PI) + 6.00; // + 1.58; // + 1.58; // AccErrorY ~(-1.58)
+accAngleX = (atan(AccY / sqrt(pow(AccX, 2) + pow(AccZ, 2))) * 180 / PI) - 0.49;// + 0.75; // - 0.58; // - 0.58; // AccErrorX ~(0.58) See the calculate_IMU_error()custom function for more details
+accAngleY = (atan(-1 * AccX / sqrt(pow(AccY, 2) + pow(AccZ, 2))) * 180 / PI) - 3.07;// + 6.00; // + 1.58; // + 1.58; // AccErrorY ~(-1.58)
 // === Read gyroscope data === //
 previousTime = currentTime; // Previous time is stored before the actual time read
 currentTime = millis(); // Current time actual time read
@@ -61,9 +61,9 @@ GyroX = (Wire.read() << 8 | Wire.read()) / 131.0; // For a 250deg/s range we hav
 GyroY = (Wire.read() << 8 | Wire.read()) / 131.0;
 GyroZ = (Wire.read() << 8 | Wire.read()) / 131.0;
 // Correct the outputs with the calculated error values
-GyroX = GyroX - 2.03; // + 0.56; // GyroErrorX ~(-0.56)
-GyroY = GyroY - 5.91; // - 2; // GyroErrorY ~(2)
-GyroZ = GyroZ + 0.08; // + 0.79; // GyroErrorZ ~ (-0.8)
+GyroX = GyroX - 0.28;// - 2.03; // + 0.56; // GyroErrorX ~(-0.56)
+GyroY = GyroY - 0.24;// - 5.91; // - 2; // GyroErrorY ~(2)
+GyroZ = GyroZ - 0.46;// + 0.08; // + 0.79; // GyroErrorZ ~ (-0.8)
 // Currently the raw values are in degrees per seconds, deg/s, so we need to multiply by sendonds (s) to get the angle in degrees
 gyroAngleX = gyroAngleX + GyroX * elapsedTime; // deg/s * s = deg
 gyroAngleY = gyroAngleY + GyroY * elapsedTime;
@@ -77,9 +77,9 @@ Serial.print("/");
 Serial.print(pitch);
 Serial.print("/");
 Serial.println(yaw);
-/*
-calculate_IMU_error();
-*/
+//uncomment to get error values and add to /subtract from the values above based on error 
+//calculate_IMU_error();
+
 }
 void calculate_IMU_error() {
 // We can call this funtion in the setup section to calculate the accelerometer and gyro data error. From here we will get the error values used in the above equations printed on the Serial Monitor.
@@ -127,10 +127,10 @@ Serial.print("AccErrorX: ");
 Serial.println(AccErrorX);
 Serial.print("AccErrorY: ");
 Serial.println(AccErrorY);
-/*Serial.print("GyroErrorX: ");
+Serial.print("GyroErrorX: ");
 Serial.println(GyroErrorX);
 Serial.print("GyroErrorY: ");
 Serial.println(GyroErrorY);
 Serial.print("GyroErrorZ: ");
-Serial.println(GyroErrorZ);*/
+Serial.println(GyroErrorZ);
 }

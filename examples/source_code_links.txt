@@ -10,6 +10,11 @@ https://www.youtube.com/watch?v=fvWNnUdWwrA&ab_channel=Topufrom_Tokyo
 https://www.youtube.com/watch?v=RPHP4fAisz8&ab_channel=BlueDot
 https://www.bluedot.space/tutorials/how-many-devices-can-you-connect-on-i2c-bus/
 
+-Connecting Multiple Sensors Solution!!!
+https://arduino.stackexchange.com/questions/67553/changing-i2c-address-of-mpu-6050
+- if you connect AD0 to ground, the I2C address is 0b1101000 (binary) or 0x68 (hexadecimal)
+- if you connect AD0 to Vcc, the I2C address is 0b1101001 (binary) or 0x69 (hexadecimal)
+Need to update wiring diagram
 
 - Sensor to Servo
 https://howtomechatronics.com/projects/diy-arduino-gimbal-self-stabilizing-platform/
