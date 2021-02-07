@@ -4,20 +4,19 @@
   #include <SPI.h>
   
   int CS_PIN = 10 ; // CS pin
-  int Sensor0 = 0 ;
-  int Sensor1 = 1 ;
   String Data ="" ; 
   File myFile;
-  void setup() {
+  
+  void setupSD() {
   Serial.begin(9600);
   pinMode(CS_PIN, OUTPUT);
     initializeSD();                
-    createFile("Sample2.csv");    
-   
-    for( int i=0 ; i<6; i++ )  {     
+    createFile("Sample.csv");    
+   /*
+    for( int i=0 ; i<1000; i++ )  {     
      writeToFile() ;              
-    }   
-     myFile.close();            
+    } */  
+     //myFile.close();            
   } 
   
  void initializeSD() {
@@ -42,21 +41,18 @@
   }
  }  
  
- int writeToFile() {  
+ int writeToFile(myFile, yprs) {  
   if (myFile) {
-    Sensor0 = analogRead(A0) ; 
-    Sensor1 = analogRead(A1) ; 
-    Data= String(Sensor0)+","+String(Sensor1) ;
+    Data= String(yprs[0])+", "+String(yprs[1])+", "+String(yprs[2])+", "+String(yprs[3])+", "+String(yprs[4])+", "+String(yprs[5]);
              
     myFile.println(Data);  // Write this Data to SD
     
     Serial.println(Data);
-    delay(100);    
+    delay(10);
     return 1;
   } else {
-    Serial.println("Couldn't write to file");
+    Serial.println("Couldn't write to file");\
     return 0;
   }
  }  
-   
-  void loop() {  }</strong>
+</strong>
