@@ -1,9 +1,9 @@
-  
 /*
 Arduino and MPU6050 Accelerometer and Gyroscope Sensor Tutorial
 by Dejan, https://howtomechatronics.com
 */
 #include <Wire.h>
+#include <Servo.h>
 const int MPU = 0x68; // MPU6050 I2C address
 float AccX, AccY, AccZ;
 float GyroX, GyroY, GyroZ;
@@ -13,14 +13,25 @@ float AccErrorX, AccErrorY, GyroErrorX, GyroErrorY, GyroErrorZ;
 float elapsedTime, currentTime, previousTime;
 int c = 0;
 
+//Servo Control
+Servo servo1;
+Servo servo2;
+Servo servo3;
 
 void setup() {
-Serial.begin(19200);
-Wire.begin(); // Initialize comunication
-Wire.beginTransmission(MPU); // Start communication with MPU6050 // MPU=0x68
-Wire.write(0x6B); // Talk to the register 6B
-Wire.write(0x00); // Make reset - place a 0 into the 6B register
-Wire.endTransmission(true); //end the transmission
+  Serial.begin(19200);
+  Wire.begin(); // Initialize comunication
+  Wire.beginTransmission(MPU); // Start communication with MPU6050 // MPU=0x68
+  Wire.write(0x6B); // Talk to the register 6B
+  Wire.write(0x00); // Make reset - place a 0 into the 6B register
+  Wire.endTransmission(true); //end the transmission
+  servo1.attach(2);
+  servo2.attach(3);
+  servo3.attach(4);
+  //stable degrees
+  servo1.write(65);
+  servo2.write(170);
+  servo3.write(95);
 /*
 // Configure Accelerometer Sensitivity - Full Scale Range (default +/- 2g)
 Wire.beginTransmission(MPU);
@@ -38,16 +49,19 @@ delay(20);
 calculate_IMU_error();
 delay(20);
 }
+
 void loop() {
 // === Read acceleromter data === //
 Wire.beginTransmission(MPU);
 Wire.write(0x3B); // Start with register 0x3B (ACCEL_XOUT_H)
 Wire.endTransmission(false);
 Wire.requestFrom(MPU, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
+
 //For a range of +-2g, we need to divide the raw values by 16384, according to the datasheet
 AccX = (Wire.read() << 8 | Wire.read()) / 16384.0; // X-axis value
 AccY = (Wire.read() << 8 | Wire.read()) / 16384.0; // Y-axis value
 AccZ = (Wire.read() << 8 | Wire.read()) / 16384.0; // Z-axis value
+
 // Calculating Roll and Pitch from the accelerometer data
 accAngleX = (atan(AccY / sqrt(pow(AccX, 2) + pow(AccZ, 2))) * 180 / PI) + 0.26;// + 0.75; // - 0.58; // - 0.58; // AccErrorX ~(0.58) See the calculate_IMU_error()custom function for more details
 accAngleY = (atan(-1 * AccX / sqrt(pow(AccY, 2) + pow(AccZ, 2))) * 180 / PI) + 0.15;// + 6.00; // + 1.58; // + 1.58; // AccErrorY ~(-1.58)
@@ -62,25 +76,33 @@ Wire.requestFrom(MPU, 6, true); // Read 4 registers total, each axis value is st
 GyroX = (Wire.read() << 8 | Wire.read()) / 131.0; // For a 250deg/s range we have to divide first the raw value by 131.0, according to the datasheet
 GyroY = (Wire.read() << 8 | Wire.read()) / 131.0;
 GyroZ = (Wire.read() << 8 | Wire.read()) / 131.0;
+
 // Correct the outputs with the calculated error values
-GyroX = GyroX - 2.23;// - 2.03; // + 0.56; // GyroErrorX ~(-0.56)
-GyroY = GyroY - 5.63;// - 5.91; // - 2; // GyroErrorY ~(2)
-GyroZ = GyroZ - .75;// + 0.08; // + 0.79; // GyroErrorZ ~ (-0.8)
+GyroX = GyroX - 0.38;// - 2.03; // + 0.56; // GyroErrorX ~(-0.56)
+GyroY = GyroY + 0.54;// - 5.91; // - 2; // GyroErrorY ~(2)
+GyroZ = GyroZ - 0.44;// + 0.08; // + 0.79; // GyroErrorZ ~ (-0.8)
+
 // Currently the raw values are in degrees per seconds, deg/s, so we need to multiply by sendonds (s) to get the angle in degrees
 gyroAngleX = gyroAngleX + GyroX * elapsedTime; // deg/s * s = deg
 gyroAngleY = gyroAngleY + GyroY * elapsedTime;
 yaw = yaw + GyroZ * elapsedTime;
+
 // Complementary filter - combine acceleromter and gyro angle values
 roll = 0.96 * gyroAngleX + 0.04 * accAngleX;
 pitch = 0.96 * gyroAngleY + 0.04 * accAngleY;
+
 // Print the values on the serial monitor
 Serial.print(roll);
 Serial.print("/");
 Serial.print(pitch);
 Serial.print("/");
 Serial.println(yaw);
+
+servo1.write(65-yaw);
+servo2.write(170+pitch);
+servo3.write(95-roll);
 //uncomment to get error values and add to /subtract from the values above based on error 
-calculate_IMU_error();
+//calculate_IMU_error();
 
 }
 void calculate_IMU_error() {
