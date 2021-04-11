@@ -44,7 +44,7 @@ void setup() {
   pinMode(CS_PIN, OUTPUT);
   initializeSD();                
   //createFile("Sample.csv");
-  myFile = SD.open("Sample.csv", FILE_WRITE);
+  myFile = SD.open("Sample3.csv", FILE_WRITE);
   if (myFile) {
     Serial.println("File created successfully.");
   } else {
@@ -160,7 +160,7 @@ void loop() {
     Serial.println(Data);
     if (counter % 10 == 0) {
       myFile.close();
-      myFile = SD.open("Sample.csv", FILE_WRITE);
+      myFile = SD.open("Sample3.csv", FILE_WRITE);
     }
     delay(10);
     counter++;

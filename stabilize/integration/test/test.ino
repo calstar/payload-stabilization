@@ -149,8 +149,13 @@ float ypr[3];           // [yaw, pitch, roll]   yaw/pitch/roll container and gra
 float servo1init = 85;
 float servo2init = 95; //170;
 float servo3init = 95;
+float ang = 60;
 // packet structure for InvenSense teapot demo
 uint8_t teapotPacket[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\n' };
+
+// Photorelay
+int relay = 9;
+bool launched = true;
 
 
 
@@ -171,6 +176,7 @@ void dmpDataReady() {
 
 void setup() {
     // join I2C bus (I2Cdev library doesn't do this automatically)
+    
     #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
         Wire.begin();
         Wire.setClock(400000); // 400kHz I2C clock. Comment this line if having compilation difficulties
@@ -178,10 +184,13 @@ void setup() {
         Fastwire::setup(400, true);
     #endif
 
+    pinMode(relay, OUTPUT);
+    digitalWrite(relay, HIGH);
+
     // initialize serial communication
     // (115200 chosen because it is required for Teapot Demo output, but it's
     // really up to you depending on your project)
-    Serial.begin(115200);
+    //Serial.begin(115200);
     //while (!Serial); // wait for Leonardo enumeration, others continue immediately
 
     // NOTE: 8MHz or slower host processors, like the Teensy @ 3.3V or Arduino
@@ -191,7 +200,8 @@ void setup() {
     // crystal solution for the UART timer.
 
     // initialize device
-    Serial.println(F("Initializing I2C devices..."));
+    // Serial.println(F("Initializing I2C devices..."));
+    
     mpu.initialize();
     pinMode(INTERRUPT_PIN, INPUT);
 
@@ -201,12 +211,13 @@ void setup() {
 
     // wait for ready
     Serial.println(F("\nSend any character to begin DMP programming and demo: "));
+    
     /*
     while (Serial.available() && Serial.read()); // empty buffer
     while (!Serial.available());                 // wait for data
     while (Serial.available() && Serial.read()); // empty buffer again
     */
-
+    
     // load and configure the DMP
     Serial.println(F("Initializing DMP..."));
     devStatus = mpu.dmpInitialize();
@@ -250,15 +261,18 @@ void setup() {
         Serial.println(F(")"));
     }
     
-    servo1.attach(3);
-    servo2.attach(4);
-    servo3.attach(5);
+    
+    servo1.attach(4);
+    servo2.attach(5);
+    servo3.attach(6);
     //stable degrees
     servo1.write(servo1init);
     servo2.write(servo2init);
     servo3.write(servo3init);
     // configure LED for output
     pinMode(LED_PIN, OUTPUT);
+
+    
 }
 
 
@@ -268,8 +282,22 @@ void setup() {
 // ================================================================
 
 void loop() {
+  /*
+  servo1.write(servo1init);
+    servo2.write(servo2init);
+    servo3.write(ang);
+    //servo3.write(servo3init);
+    delay(1000);
+    if (ang == 60) {
+      ang = 120;
+    } else {
+      ang = 60;
+    }
+    */
+  
     // if programming failed, don't try to do anything
     if (!dmpReady) return;
+    
 
     // wait for MPU interrupt or extra packet(s) available
     while (!mpuInterrupt && fifoCount < packetSize) {
@@ -334,11 +362,11 @@ void loop() {
             mpu.dmpGetQuaternion(&q, fifoBuffer);
             mpu.dmpGetEuler(euler, &q);
             Serial.print("euler\t");
-            Serial.print(euler[0] * 180/M_PI);
-            Serial.print("\t");
-            Serial.print(euler[1] * 180/M_PI);
-            Serial.print("\t");
-            Serial.println(euler[2] * 180/M_PI);
+            ////Serial.print(euler[0] * 180/M_PI);
+            //Serial.print("\t");
+            //Serial.print(euler[1] * 180/M_PI);
+            //Serial.print("\t");
+            //Serial.println(euler[2] * 180/M_PI);
         #endif
 
         #ifdef OUTPUT_READABLE_YAWPITCHROLL
@@ -346,11 +374,11 @@ void loop() {
             mpu.dmpGetQuaternion(&q, fifoBuffer);
             mpu.dmpGetGravity(&gravity, &q);
             mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-            Serial.print("ypr\t");
-            Serial.print(ypr[0] * 180/M_PI);
+            //Serial.print("ypr\t");
+            //Serial.print(ypr[0] * 180/M_PI);
             servo1.write(servo1init+ypr[0]*180/M_PI);
-            Serial.print("\t");
-            Serial.print(ypr[1] * 180/M_PI);
+            //Serial.print("\t");
+            //Serial.print(ypr[1] * 180/M_PI);
             servo2.write(servo2init-ypr[1]*180/M_PI);
             Serial.print("\t");
             Serial.println(ypr[2] * 180/M_PI);
@@ -404,5 +432,7 @@ void loop() {
         // blink LED to indicate activity
         blinkState = !blinkState;
         digitalWrite(LED_PIN, blinkState);
+        
     }
+    
 }

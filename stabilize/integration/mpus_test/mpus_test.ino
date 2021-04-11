@@ -23,18 +23,24 @@ float elapsedTime, currentTime, previousTime;
 int c = 0;
 void setup() {
 Serial.begin(19200);
-
+Serial.println('0');
 Wire.begin(); // Initialize comunication
+Serial.println('1');
 Wire.beginTransmission(MPU1); // Start communication with MPU6050 // MPU=0x68
+Serial.println('2');
 Wire.write(0x6B); // Talk to the register 6B
+Serial.println('3');
 Wire.write(0x00); // Make reset - place a 0 into the 6B register
+Serial.println('4');
 Wire.endTransmission(true); //end the transmission
-
+Serial.println('e');
+/*
 Wire.begin(); // Initialize comunication
 Wire.beginTransmission(MPU2); // Start communication with MPU6050 // MPU=0x68
 Wire.write(0x6B); // Talk to the register 6B
 Wire.write(0x00); // Make reset - place a 0 into the 6B register
 Wire.endTransmission(true); //end the transmission
+*/
 /*
 // Configure Accelerometer Sensitivity - Full Scale Range (default +/- 2g)
 Wire.beginTransmission(MPU);
@@ -49,15 +55,19 @@ Wire.endTransmission(true);
 delay(20);
 */
 // Call this function if you need to get the IMU error values for your module
-calculate_IMU_error();
+//calculate_IMU_error();
 delay(20);
 }
 void loop() {
 // === Read acceleromter data === //
+Serial.println('5');
 Wire.beginTransmission(MPU1);
+Serial.println('6');
 Wire.write(0x3B); // Start with register 0x3B (ACCEL_XOUT_H)
 Wire.endTransmission(false);
+Serial.println('h');
 Wire.requestFrom(MPU1, 6, true); // Read 6 registers total, each axis value is stored in 2 registers
+Serial.println('s');
 //For a range of +-2g, we need to divide the raw values by 16384, according to the datasheet
 AccX1 = (Wire.read() << 8 | Wire.read()) / 16384.0; // X-axis value
 AccY1 = (Wire.read() << 8 | Wire.read()) / 16384.0; // Y-axis value
@@ -90,6 +100,7 @@ pitch1 = 0.96 * gyroAngleY1 + 0.04 * accAngleY1;
 
 // Do the same for MPU2 //
 // === Read acceleromter data === //
+/*
 Wire.beginTransmission(MPU2);
 Wire.write(0x3B); // Start with register 0x3B (ACCEL_XOUT_H)
 Wire.endTransmission(false);
@@ -123,24 +134,23 @@ yaw2 = yaw2 + GyroZ2 * elapsedTime;
 // Complementary filter - combine acceleromter and gyro angle values
 roll2 = 0.96 * gyroAngleX2 + 0.04 * accAngleX2;
 pitch2 = 0.96 * gyroAngleY2 + 0.04 * accAngleY2;
-
+*/
 
 // Print the values on the serial monitor
-
 Serial.print("1. ");
 Serial.print(roll1);
 Serial.print("/");
 Serial.print(pitch1);
 Serial.print("/");
 Serial.println(yaw1);
-
+/*
 Serial.print("2. ");
 Serial.print(roll2);
 Serial.print("/");
 Serial.print(pitch2);
 Serial.print("/");
 Serial.println(yaw2);
-
+*/
 //uncomment to get error values and add to /subtract from the values above based on error 
 //calculate_IMU_error();
 
