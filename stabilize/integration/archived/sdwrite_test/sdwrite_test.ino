@@ -1,10 +1,10 @@
-#include <Wire.h>
+//#include <Wire.h>
 
-float elapsedTime, currentTime, previousTime;
-int c = 0;
+//float elapsedTime, currentTime, previousTime;
+//int c = 0;
 
 #include <SD.h>
-#include <SPI.h>
+//#include <SPI.h>
   
 int CS_PIN = 10 ; // CS pin
 String Data ="" ; 

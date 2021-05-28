@@ -22,7 +22,7 @@ float AccErrorX2, AccErrorY2, GyroErrorX2, GyroErrorY2, GyroErrorZ2;
 float elapsedTime, currentTime, previousTime;
 int c = 0;
 void setup() {
-Serial.begin(19200);
+Serial.begin(115200);
 
 Wire.begin(); // Initialize comunication
 Wire.beginTransmission(MPU1); // Start communication with MPU6050 // MPU=0x68
@@ -126,7 +126,7 @@ pitch2 = 0.96 * gyroAngleY2 + 0.04 * accAngleY2;
 
 
 // Print the values on the serial monitor
-
+/*
 Serial.print("1. ");
 Serial.print(roll1);
 Serial.print("/");
@@ -140,6 +140,16 @@ Serial.print("/");
 Serial.print(pitch2);
 Serial.print("/");
 Serial.println(yaw2);
+*/
+
+Serial.print("1. ");
+Serial.print(AccX1);
+Serial.print("/");
+Serial.print(AccY1);
+Serial.print("/");
+Serial.println(AccZ1);
+
+delay(10);
 
 //uncomment to get error values and add to /subtract from the values above based on error 
 //calculate_IMU_error();

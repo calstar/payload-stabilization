@@ -43,7 +43,7 @@
  
  int writeToFile(myFile, yprs) {  
   if (myFile) {
-    Data= String(yprs[0])+", "+String(yprs[1])+", "+String(yprs[2])+", "+String(yprs[3])+", "+String(yprs[4])+", "+String(yprs[5]);
+    Data= String(yprs[0])+","+String(yprs[1])+","+String(yprs[2])+","+String(yprs[3])+","+String(yprs[4])+","+String(yprs[5]);
              
     myFile.println(Data);  // Write this Data to SD
     
