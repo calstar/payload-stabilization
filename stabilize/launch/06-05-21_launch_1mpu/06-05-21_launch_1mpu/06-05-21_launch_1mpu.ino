@@ -9,14 +9,12 @@
 
 
 MPU6050 mpu1(0x68);
-MPU6050 mpu2(0x69);
 
 #define OUTPUT_READABLE_YAWPITCHROLL
 #define OUTPUT_READABLE_REALACCEL
 #define OUTPUT_READABLE_WORLDACCEL
 
 #define INTERRUPT1_PIN 2
-#define INTERRUPT2_PIN 3
 
 #define LED_PIN 13
 
@@ -28,6 +26,10 @@ MPU6050 mpu2(0x69);
 
 bool blinkState = false;
 
+/*
+int VOLTAGE_PIN = A0;
+float voltage;
+*/
 unsigned long startMillis;
 unsigned long currentMillis;
 unsigned long elapsedTime;
@@ -41,13 +43,6 @@ uint16_t fifo1Count;
 uint8_t fifo1Buffer[64];
 int mpu1Counter = 0;
 
-bool dmp2Ready = false;
-uint8_t mpu2IntStatus;
-uint8_t dev2Status;
-uint16_t packet2Size;
-uint16_t fifo2Count;
-uint8_t fifo2Buffer[64];
-int mpu2Counter = 0;
 
 Servo servo1;
 Servo servo2;
@@ -61,14 +56,6 @@ VectorFloat gravity1;
 float euler1[3];
 float ypr1[3];
 
-Quaternion q2;
-VectorInt16 aa2;
-VectorInt16 aa2Real;
-VectorInt16 aa2World;
-VectorFloat gravity2;
-float euler2[3];
-float ypr2[3];
-
 float servo1init = 85;
 float servo2init = 95;
 float servo3init = 95;
@@ -76,7 +63,6 @@ float ang = 60;
 int servoInitCounter = 0;
 
 uint8_t teapot1Packet[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\n' };
-uint8_t teapot2Packet[14] = { '$', 0x02, 0,0, 0,0, 0,0, 0,0, 0x00, 0x00, '\r', '\n' };
 
 int relay = 9;
 bool launched = false;
@@ -85,9 +71,8 @@ bool completed = false;
 
 int CS_PIN = 10;
 String Data1 = "";
-String Data2 = "";
 File myFile;
-String myFileName = "Sample.csv";
+String myFileName = "launch.csv"; //longer filenames don't work, not sure other rules
 int counter = 0;
 
 
@@ -96,10 +81,6 @@ void dmp1DataReady() {
     mpu1Interrupt = true;
 }
 
-volatile bool mpu2Interrupt = false;     // indicates whether MPU interrupt pin has gone high
-void dmp2DataReady() {
-    mpu2Interrupt = true;
-}
 
 void mpu1Calibrate() {
   Serial.println(F("Initializing MPU1 DMP..."));
@@ -139,45 +120,6 @@ void mpu1Calibrate() {
   }
 }
 
-void mpu2Calibrate() {
-  Serial.println(F("Initializing MPU2 DMP..."));
-  dev2Status = mpu2.dmpInitialize();
-  
-  // supply your own gyro offsets here, scaled for min sensitivity
-  mpu2.setXGyroOffset(220);
-  mpu2.setYGyroOffset(76);
-  mpu2.setZGyroOffset(-85);
-  mpu2.setZAccelOffset(1788); // 1688 factory default for my test chip
-  
-  if (dev2Status == 0) {
-    
-    mpu2.CalibrateAccel(6);
-    Serial.println("HI");
-    mpu2.CalibrateGyro(6);
-    
-    mpu2.PrintActiveOffsets();
-    Serial.println(F("Enabling DMP..."));
-    mpu2.setDMPEnabled(true);
-
-    Serial.print(F("Enabling interrupt detection (Arduino external interrupt "));
-    Serial.print(digitalPinToInterrupt(INTERRUPT2_PIN));
-    Serial.println(F(")..."));
-    attachInterrupt(digitalPinToInterrupt(INTERRUPT2_PIN), dmp2DataReady, RISING);
-    mpu2IntStatus = mpu2.getIntStatus();
-
-    Serial.println(F("DMP ready! Waiting for first interrupt..."));
-    dmp2Ready = true;
-    packet2Size = mpu2.dmpGetFIFOPacketSize();
-  } else {
-      // ERROR!
-      // 1 = initial memory load failed
-      // 2 = DMP configuration updates failed
-      // (if it's going to break, usually the code will be 1)
-      Serial.print(F("DMP Initialization failed (code "));
-      Serial.print(dev2Status);
-      Serial.println(F(")"));
-  }
-}
 
 void initializeSD() {
   Serial.println("Initializing SD card...");
@@ -202,9 +144,6 @@ void setup() {
   
   //digitalWrite(ADO_HIGH_PIN, HIGH);
   
-  
-
-  
   mpu1.initialize();
   pinMode(INTERRUPT1_PIN, INPUT);
   Serial.println(F("Testing device connections..."));
@@ -217,14 +156,6 @@ void setup() {
   servo3.attach(SERVO3_PIN);
   pinMode(relay, OUTPUT);
   setServos();
-  /*
-  mpu2.initialize(); // Check if commenting these
-  pinMode(INTERRUPT2_PIN, INPUT);
-  Serial.println(F("Testing device connections..."));
-  Serial.println(mpu2.testConnection() ? F("MPU2 connection successful") : F("MPU2 connection failed"));
-  Serial.println(F("\nSend any character to begin DMP programming and demo: "));
-  mpu2Calibrate();
-  */
   
   waitForLaunch();
   initializeSD();
@@ -232,9 +163,7 @@ void setup() {
   Serial.println(myFile);
   if (myFile) {
     Serial.println("File created successfully.");
-    //myFile.println(String("LAUNCHED")+","+"YPR1[0]"+","+"YPR1[1]"+","+"YPR1[2]"+","+"YPR2[0]"+","+"YPR2[1]"+","+"YPR2[2]");
-    //myFile.println(String("LAUNCHED")+","+"MPU"+","+"YPR1"+","+"YPR2"+","+"YPR3");
-    myFile.println(String("LAUNCHED")+","+"YPR1"+","+"YPR2"+","+"YPR3");
+    myFile.println(String("LAUNCHED")+","+"YPR1"+","+"YPR2"+","+"YPR3"+","+"ACCELREALZ");
   } else {
     Serial.println("Error while creating file.");
   }
@@ -324,10 +253,24 @@ void waitForLaunch() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  
+  //voltage = analogRead(VOLTAGE_PIN) * 5.0/1023;
   currentMillis = millis();
   elapsedTime = currentMillis - startMillis;
   //Serial.println("TIME SINCE LAUNCH: " + (elapsedTime));
+
+  if (elapsedTime > 120000) {
+    digitalWrite(relay, LOW);
+    myFile.println(String(elapsedTime)+","+"PROGRAM FINISHED");
+    myFile.close();
+    exit(0);
+    /*
+    while (true) {
+      //don't do anything
+      Serial.println("LAUNCH OVER");
+      delay(100);
+    }
+    */
+  }
   
   // if programming failed, don't try to do anything
   
@@ -364,8 +307,11 @@ void loop() {
       #ifdef OUTPUT_READABLE_YAWPITCHROLL
           // display Euler angles in degrees
           mpu1.dmpGetQuaternion(&q1, fifo1Buffer);
+          mpu1.dmpGetAccel(&aa1, fifo1Buffer);
           mpu1.dmpGetGravity(&gravity1, &q1);
           mpu1.dmpGetYawPitchRoll(ypr1, &q1, &gravity1);
+          mpu1.dmpGetLinearAccel(&aa1Real, &aa1, &gravity1);
+          
           //Serial.print("ypr\t");
           //Serial.print(ypr[0] * 180/M_PI);
           servo1.write(servo1init+ypr1[0]*180/M_PI);
@@ -378,27 +324,10 @@ void loop() {
       #endif
 
       if (myFile) {
-        //Data = String(elapsedTime)+","+String(ypr1[0])+","+String(ypr1[1])+","+String(ypr1[2])+","+String(ypr2[0])+","+String(ypr2[1])+","+String(ypr2[2]);
-        //Data = String(0)+","+String(ypr1[0])+","+String(ypr1[1])+","+String(ypr1[2])+","+String(ypr2[0])+","+String(ypr2[1])+","+String(ypr2[2]);
-        //delay(50);
-        //Data1 = String(elapsedTime)+","+"MPU1"+","+String(ypr1[0])+","+String(ypr1[1])+","+String(ypr1[2]);
-        //Data2 = String(elapsedTime)+","+"MPU2"+","+String(ypr2[0])+","+String(ypr2[1])+","+String(ypr2[2]);
-        //Data1 = String("MPU1")+","+String(ypr1[0])+","+String(ypr1[1])+","+String(ypr1[2]);
-        //Data2 = String("MPU2")+","+String(ypr2[0])+","+String(ypr2[1])+","+String(ypr2[2]);
-        //Data1 = String(elapsedTime)+","+String(ypr1[0])+","+String(ypr1[1])+","+String(ypr1[2]);
-        //Data2 = String(elapsedTime)+","+String(ypr2[0])+","+String(ypr2[1])+","+String(ypr2[2]);
-        //myFile.println(Data1);
-        myFile.println(String(elapsedTime)+","+String(ypr1[0])+","+String(ypr1[1])+","+String(ypr1[2]));
-        //Serial.println(Data1);
-        //delay(10);
-        //myFile.println(Data2);
-        //delay(10);
-        //Serial.println(Data2);
-        //delay(15);
+        myFile.println(String(elapsedTime)+","+String(ypr1[0])+","+String(ypr1[1])+","+String(ypr1[2])+","+String(aa1Real.z));
         if (counter >= 50) {
           myFile.close();
           myFile = SD.open(myFileName, FILE_WRITE);
-          //delay(10);
         }
         //delay(10);
         counter++;

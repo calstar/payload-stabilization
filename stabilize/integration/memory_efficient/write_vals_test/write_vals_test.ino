@@ -28,6 +28,9 @@ MPU6050 mpu2(0x69);
 
 bool blinkState = false;
 
+int VOLTAGE_PIN = A0;
+float voltage;
+
 unsigned long startMillis;
 unsigned long currentMillis;
 unsigned long elapsedTime;
@@ -87,7 +90,7 @@ int CS_PIN = 10;
 String Data1 = "";
 String Data2 = "";
 File myFile;
-String myFileName = "Sample.csv";
+String myFileName = "Sample3.csv";
 int counter = 0;
 
 
@@ -234,7 +237,8 @@ void setup() {
     Serial.println("File created successfully.");
     //myFile.println(String("LAUNCHED")+","+"YPR1[0]"+","+"YPR1[1]"+","+"YPR1[2]"+","+"YPR2[0]"+","+"YPR2[1]"+","+"YPR2[2]");
     //myFile.println(String("LAUNCHED")+","+"MPU"+","+"YPR1"+","+"YPR2"+","+"YPR3");
-    myFile.println(String("LAUNCHED")+","+"YPR1"+","+"YPR2"+","+"YPR3");
+    //myFile.println(String("LAUNCHED")+","+"YPR1"+","+"YPR2"+","+"YPR3");
+    myFile.println(String("LAUNCHED")+","+"YPR1"+","+"YPR2"+","+"YPR3"+","+"VOLTAGE");
   } else {
     Serial.println("Error while creating file.");
   }
@@ -324,10 +328,24 @@ void waitForLaunch() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-  
+  voltage = analogRead(VOLTAGE_PIN) * 5.0/1023;
   currentMillis = millis();
   elapsedTime = currentMillis - startMillis;
   //Serial.println("TIME SINCE LAUNCH: " + (elapsedTime));
+
+  if (elapsedTime > 120000) {
+    digitalWrite(relay, LOW);
+    myFile.println(String(elapsedTime)+","+"PROGRAM FINISHED");
+    myFile.close();
+    exit(0);
+    /*
+    while (true) {
+      //don't do anything
+      Serial.println("LAUNCH OVER");
+      delay(100);
+    }
+    */
+  }
   
   // if programming failed, don't try to do anything
   
@@ -366,6 +384,7 @@ void loop() {
           mpu1.dmpGetQuaternion(&q1, fifo1Buffer);
           mpu1.dmpGetGravity(&gravity1, &q1);
           mpu1.dmpGetYawPitchRoll(ypr1, &q1, &gravity1);
+          
           //Serial.print("ypr\t");
           //Serial.print(ypr[0] * 180/M_PI);
           servo1.write(servo1init+ypr1[0]*180/M_PI);
@@ -388,7 +407,8 @@ void loop() {
         //Data1 = String(elapsedTime)+","+String(ypr1[0])+","+String(ypr1[1])+","+String(ypr1[2]);
         //Data2 = String(elapsedTime)+","+String(ypr2[0])+","+String(ypr2[1])+","+String(ypr2[2]);
         //myFile.println(Data1);
-        myFile.println(String(elapsedTime)+","+String(ypr1[0])+","+String(ypr1[1])+","+String(ypr1[2]));
+        //myFile.println(String(elapsedTime)+","+String(ypr1[0])+","+String(ypr1[1])+","+String(ypr1[2]));
+        myFile.println(String(elapsedTime)+","+String(ypr1[0])+","+String(ypr1[1])+","+String(ypr1[2])+","+String(voltage));
         //Serial.println(Data1);
         //delay(10);
         //myFile.println(Data2);
@@ -398,7 +418,7 @@ void loop() {
         if (counter >= 50) {
           myFile.close();
           myFile = SD.open(myFileName, FILE_WRITE);
-          //delay(10);
+          delay(10);
         }
         //delay(10);
         counter++;

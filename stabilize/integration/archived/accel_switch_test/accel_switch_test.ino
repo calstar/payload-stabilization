@@ -224,13 +224,14 @@ void setup() {
   servo3.attach(SERVO3_PIN);
   pinMode(relay, OUTPUT);
   setServos();
-  
+  /*
   mpu2.initialize();
   pinMode(INTERRUPT2_PIN, INPUT);
   Serial.println(F("Testing device connections..."));
   Serial.println(mpu2.testConnection() ? F("MPU2 connection successful") : F("MPU2 connection failed"));
   Serial.println(F("\nSend any character to begin DMP programming and demo: "));
   //mpu2Calibrate();
+  */
   
   waitForLaunch();
   startMillis = millis();
